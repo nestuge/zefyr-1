@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:notus/src/document/embeds.dart';
 import 'package:quill_delta/quill_delta.dart';
 
 import 'attributes.dart';
@@ -17,10 +18,10 @@ import 'node.dart';
 ///
 /// When a line contains an embed, it fully occupies the line, no other embeds
 /// or text nodes are allowed.
-class LineNode extends ContainerNode<LeafNode>
+class LineNode extends ContainerNode<LeafNode?>
     with StyledNodeMixin
     implements StyledNode {
-  /// Returns `true` if this line contains an embed.
+  /// Returns `true` if this line contains an embedded object.
   bool get hasEmbed {
     if (childCount == 1) {
       return children.single is EmbedNode;
@@ -30,24 +31,26 @@ class LineNode extends ContainerNode<LeafNode>
   }
 
   /// Returns next [LineNode] or `null` if this is the last line in the document.
-  LineNode get nextLine {
+  LineNode? get nextLine {
     if (isLast) {
       if (parent is BlockNode) {
-        if (parent.isLast) return null;
-        LineNode line = (parent.next is BlockNode)
-            ? (parent.next as BlockNode).first
-            : parent.next;
+        if (parent!.isLast) return null;
+        LineNode? line = (parent!.next is BlockNode)
+            ? (parent!.next as BlockNode).first as LineNode?
+            : parent!.next as LineNode?;
         return line;
       } else {
         return null;
       }
     } else {
-      LineNode line = (next is BlockNode) ? (next as BlockNode).first : next;
+      LineNode? line = (next is BlockNode) ? (next as BlockNode).first as LineNode? : next as LineNode?;
       return line;
     }
   }
 
   /// Creates new empty [LineNode] with the same style.
+  ///
+  /// Returned line node is detached.
   LineNode clone() {
     final node = LineNode();
     node.applyStyle(style);
@@ -66,12 +69,12 @@ class LineNode extends ContainerNode<LeafNode>
     if (index == length - 1) return line;
 
     final split = lookup(index);
-    while (!split.node.isLast) {
-      LeafNode child = last;
+    while (!split.node!.isLast) {
+      LeafNode child = last as LeafNode;
       child.unlink();
       line.addFirst(child);
     }
-    LeafNode child = split.node;
+    LeafNode child = split.node as LeafNode;
     line.addFirst(child.cutAt(split.offset));
     return line;
   }
@@ -81,7 +84,7 @@ class LineNode extends ContainerNode<LeafNode>
   /// This method asserts if current [parent] of this line is not a [BlockNode].
   void unwrap() {
     assert(parent is BlockNode);
-    BlockNode block = parent;
+    BlockNode block = parent as BlockNode;
     block.unwrapLine(this);
   }
 
@@ -127,26 +130,26 @@ class LineNode extends ContainerNode<LeafNode>
     }
 
     final data = lookup(offset, inclusive: true);
-    LeafNode node = data.node;
+    LeafNode? node = data.node as LeafNode?;
     if (node != null) {
       result = result.mergeAll(node.style);
       var pos = node.length - data.offset;
-      while (!node.isLast && pos < local) {
-        node = node.next as LeafNode;
-        _handle(node.style);
+      while (!node!.isLast && pos < local) {
+        node = node.next as LeafNode?;
+        _handle(node!.style);
         pos += node.length;
       }
     }
 
     result = result.mergeAll(style);
     if (parent is BlockNode) {
-      BlockNode block = parent;
+      BlockNode block = parent as BlockNode;
       result = result.mergeAll(block.style);
     }
 
     final remaining = length - local;
     if (remaining > 0) {
-      final rest = nextLine.collectStyle(0, remaining);
+      final rest = nextLine!.collectStyle(0, remaining);
       _handle(rest);
     }
 
@@ -163,11 +166,11 @@ class LineNode extends ContainerNode<LeafNode>
   @override
   Delta toDelta() {
     final delta = children
-        .map((text) => text.toDelta())
-        .fold(Delta(), (a, b) => a.concat(b));
+        .map((child) => child.toDelta())
+        .fold(Delta(), (dynamic a, b) => a.concat(b));
     var attributes = style;
     if (parent is BlockNode) {
-      BlockNode block = parent;
+      BlockNode block = parent as BlockNode;
       attributes = attributes.mergeAll(block.style);
     }
     delta.insert('\n', attributes.toJson());
@@ -190,7 +193,19 @@ class LineNode extends ContainerNode<LeafNode>
   }
 
   @override
-  void insert(int index, String text, NotusStyle style) {
+  void insert(int index, Object data, NotusStyle? style) {
+    if (data is EmbeddableObject) {
+      // We do not check whether this line already has any children here as
+      // inserting an embed into a line with other text is acceptable from the
+      // Delta format perspective.
+      // We rely on heuristic rules to ensure that embeds occupy an entire line.
+      _insertSafe(index, data, style);
+      return;
+    }
+
+    assert(data is String);
+
+    final text = data as String;
     final lf = text.indexOf('\n');
     if (lf == -1) {
       _insertSafe(index, text, style);
@@ -223,7 +238,7 @@ class LineNode extends ContainerNode<LeafNode>
     final thisLength = this.length;
 
     final local = math.min(thisLength - index, length);
-    // If index is at line-break character this is line/block format update.
+    // If index is at newline character then this is a line/block style update.
     final isLineFormat = (index + local == thisLength) && local == 1;
 
     if (isLineFormat) {
@@ -232,7 +247,7 @@ class LineNode extends ContainerNode<LeafNode>
           'It is not allowed to apply inline attributes to line itself.');
       _formatAndOptimize(style);
     } else {
-      // otherwise forward to children as it's inline format update.
+      // Otherwise forward to children as it's an inline format update.
       assert(index + local != thisLength,
           'It is not allowed to apply inline attributes to line itself.');
       assert(style.values
@@ -243,7 +258,7 @@ class LineNode extends ContainerNode<LeafNode>
     final remaining = length - local;
     if (remaining > 0) {
       assert(nextLine != null);
-      nextLine.retain(0, remaining, style);
+      nextLine!.retain(0, remaining, style);
     }
   }
 
@@ -252,10 +267,10 @@ class LineNode extends ContainerNode<LeafNode>
     final local = math.min(this.length - index, length);
     final isLFDeleted = (index + local == this.length);
     if (isLFDeleted) {
-      // Our line-break deleted with all style information.
+      // Our newline character deleted with all style information.
       clearStyle();
       if (local > 1) {
-        // Exclude line-break from delete range for children.
+        // Exclude newline character from delete range for children.
         super.delete(index, local - 1);
       }
     } else {
@@ -265,7 +280,7 @@ class LineNode extends ContainerNode<LeafNode>
     final remaining = length - local;
     if (remaining > 0) {
       assert(nextLine != null);
-      nextLine.delete(0, remaining);
+      nextLine!.delete(0, remaining);
     }
     if (isLFDeleted && isNotEmpty) {
       // Since we lost our line-break and still have child text nodes those must
@@ -275,22 +290,22 @@ class LineNode extends ContainerNode<LeafNode>
       // check again we still have a line after us.
       assert(nextLine != null);
 
-      // Move remaining stuff in this line to next line so that all attributes
-      // of nextLine are preserved.
-      nextLine.moveChildren(this); // TODO: avoid double move
+      // Move remaining children in this line to the next line so that all
+      // attributes of nextLine are preserved.
+      nextLine!.moveChildren(this); // TODO: avoid double move
       moveChildren(nextLine);
     }
 
     if (isLFDeleted) {
       // Now we can remove this line.
-      final block = parent; // remember reference before un-linking.
+      final block = parent!; // remember reference before un-linking.
       unlink();
       block.optimize();
     }
   }
 
   /// Formats this line and optimizes layout afterwards.
-  void _formatAndOptimize(NotusStyle newStyle) {
+  void _formatAndOptimize(NotusStyle? newStyle) {
     if (newStyle == null || newStyle.isEmpty) return;
 
     applyStyle(newStyle);
@@ -306,31 +321,34 @@ class LineNode extends ContainerNode<LeafNode>
       } else if (blockStyle != parentStyle) {
         unwrap();
         final block = BlockNode();
-        block.applyAttribute(blockStyle);
+        block.applyAttribute(blockStyle!);
         wrap(block);
         block.optimize();
       } // else the same style, no-op.
     } else if (blockStyle != NotusAttribute.block.unset) {
       // Only wrap with a new block if this is not an unset
       final block = BlockNode();
-      block.applyAttribute(blockStyle);
+      block.applyAttribute(blockStyle!);
       wrap(block);
       block.optimize();
     }
   }
 
-  void _insertSafe(int index, String text, NotusStyle style) {
+  void _insertSafe(int index, Object data, NotusStyle? style) {
     assert(index == 0 || (index > 0 && index < length));
-    assert(text.contains('\n') == false);
-    if (text.isEmpty) return;
+
+    if (data is String) {
+      assert(data.contains('\n') == false);
+      if (data.isEmpty) return;
+    }
 
     if (isEmpty) {
-      final child = LeafNode(text);
+      final child = LeafNode(data);
       add(child);
       child.formatAndOptimize(style);
     } else {
       final result = lookup(index, inclusive: true);
-      result.node.insert(result.offset, text, style);
+      result.node!.insert(result.offset, data, style);
     }
   }
 }
