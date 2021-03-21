@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:quiver_hashcode/hashcode.dart';
+import 'package:quiver/core.dart';
 
 const _dataEquality = DeepCollectionEquality();
 
@@ -21,7 +21,7 @@ class EmbeddableObject {
 
   EmbeddableObject(
     this.type, {
-    @required this.inline,
+    required this.inline,
     Map<String, dynamic> data = const {},
   })  : assert(type != null),
         assert(inline != null),
@@ -43,22 +43,22 @@ class EmbeddableObject {
   final Map<String, dynamic> _data;
 
   static EmbeddableObject fromJson(Map<String, dynamic> json) {
-    final type = json[kTypeKey] as String;
+    final type = json[kTypeKey] as String?;
     final inline = json[kInlineKey] as bool;
     final data = Map<String, dynamic>.from(json);
     data.remove(kTypeKey);
     data.remove(kInlineKey);
     if (inline) {
-      return SpanEmbed(type, data: data);
+      return SpanEmbed(type!, data: data);
     }
-    return BlockEmbed(type, data: data);
+    return BlockEmbed(type!, data: data);
   }
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other is! EmbeddableObject) return false;
-    final typedOther = other as EmbeddableObject;
+    final typedOther = other;
     return typedOther.type == type &&
         typedOther.inline == inline &&
         _dataEquality.equals(typedOther._data, _data);

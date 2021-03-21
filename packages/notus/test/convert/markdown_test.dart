@@ -20,12 +20,12 @@ void main() {
   group('$NotusMarkdownCodec.encode', () {
     test('split adjacent paragraphs', () {
       final delta = Delta()..insert('First line\nSecond line\n');
-      final result = notusMarkdown.encode(delta);
+      final String result = notusMarkdown.encode(delta);
       expect(result, 'First line\n\nSecond line\n\n');
     });
 
     test('bold italic', () {
-      void runFor(NotusAttribute<bool> attribute, String expected) {
+      void runFor(NotusAttribute<bool?> attribute, String expected) {
         final delta = Delta()
           ..insert('This ')
           ..insert('house', attribute.toJson())
@@ -33,7 +33,7 @@ void main() {
           ..insert('circus', attribute.toJson())
           ..insert('\n');
 
-        final result = notusMarkdown.encode(delta);
+        final String result = notusMarkdown.encode(delta);
         expect(result, expected);
       }
 
@@ -54,7 +54,7 @@ void main() {
         ..insert('circus', b)
         ..insert('\n');
 
-      final result = notusMarkdown.encode(delta);
+      final String result = notusMarkdown.encode(delta);
       expect(result, 'This **house _is a_ circus**\n\n');
     });
 
@@ -68,7 +68,7 @@ void main() {
         ..insert(' circus ', i)
         ..insert('\n');
 
-      final result = notusMarkdown.encode(delta);
+      final String result = notusMarkdown.encode(delta);
       expect(result, 'This **house** is a _circus_ \n\n');
     });
 
@@ -82,7 +82,7 @@ void main() {
         ..insert(' circus ', link.toJson())
         ..insert('\n');
 
-      final result = notusMarkdown.encode(delta);
+      final String result = notusMarkdown.encode(delta);
       expect(result, 'This **house** is a [circus](https://github.com) \n\n');
     });
 
@@ -90,7 +90,7 @@ void main() {
       void runFor(
           NotusAttribute<int> attribute, String source, String expected) {
         final delta = Delta()..insert(source)..insert('\n', attribute.toJson());
-        final result = notusMarkdown.encode(delta);
+        final String result = notusMarkdown.encode(delta);
         expect(result, expected);
       }
 
@@ -103,7 +103,7 @@ void main() {
       void runFor(
           NotusAttribute<String> attribute, String source, String expected) {
         final delta = Delta()..insert(source)..insert('\n', attribute.toJson());
-        final result = notusMarkdown.encode(delta);
+        final String result = notusMarkdown.encode(delta);
         expect(result, expected);
       }
 
@@ -121,7 +121,7 @@ void main() {
           ..insert('\n', attribute.toJson())
           ..insert(source)
           ..insert('\n', attribute.toJson());
-        final result = notusMarkdown.encode(delta);
+        final String result = notusMarkdown.encode(delta);
         expect(result, expected);
       }
 
@@ -132,7 +132,7 @@ void main() {
     });
 
     test('multiple styles', () {
-      final result = notusMarkdown.encode(delta);
+      final String result = notusMarkdown.encode(delta);
       expect(result, expectedMarkdown);
     });
   });

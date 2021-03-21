@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 import 'package:collection/collection.dart';
-import 'package:quiver_hashcode/hashcode.dart';
+import 'package:quiver/core.dart';
 
 /// Scope of a style attribute, defines context in which an attribute can be
 /// applied.
@@ -41,7 +41,7 @@ abstract class NotusAttributeBuilder<T> implements NotusAttributeKey<T> {
   @override
   final String key;
   final NotusAttributeScope scope;
-  NotusAttribute<T> get unset => NotusAttribute<T>._(key, scope, null);
+  NotusAttribute<T?> get unset => NotusAttribute<T?>._(key, scope, null);
   NotusAttribute<T> withValue(T value) =>
       NotusAttribute<T>._(key, scope, value);
 }
@@ -137,7 +137,7 @@ class NotusAttribute<T> implements NotusAttributeBuilder<T> {
       throw ArgumentError.value(
           key, 'No attribute with key "$key" registered.');
     }
-    final builder = _registry[key];
+    final builder = _registry[key]!;
     return builder.withValue(value);
   }
 
@@ -168,7 +168,7 @@ class NotusAttribute<T> implements NotusAttributeBuilder<T> {
   /// When composed into a rich text document, unset attributes remove
   /// associated style.
   @override
-  NotusAttribute<T> get unset => NotusAttribute<T>._(key, scope, null);
+  NotusAttribute<T?> get unset => NotusAttribute<T?>._(key, scope, null);
 
   /// Returns `true` if this attribute is an unset attribute.
   bool get isUnset => value == null;
@@ -205,7 +205,7 @@ class NotusStyle {
 
   final Map<String, NotusAttribute> _data;
 
-  static NotusStyle fromJson(Map<String, dynamic> data) {
+  static NotusStyle fromJson(Map<String, dynamic>? data) {
     if (data == null) return NotusStyle();
 
     final result = data.map((String key, dynamic value) {
@@ -247,11 +247,11 @@ class NotusStyle {
   }
 
   /// Returns value of specified attribute [key] in this set.
-  T value<T>(NotusAttributeKey<T> key) => get(key).value;
+  T? value<T>(NotusAttributeKey<T> key) => get(key)!.value;
 
   /// Returns [NotusAttribute] from this set by specified [key].
-  NotusAttribute<T> get<T>(NotusAttributeKey<T> key) =>
-      _data[key.key] as NotusAttribute<T>;
+  NotusAttribute<T?>? get<T>(NotusAttributeKey<T> key) =>
+      _data[key.key] as NotusAttribute<T?>?;
 
   /// Returns collection of all attribute keys in this set.
   Iterable<String> get keys => _data.keys;
@@ -303,7 +303,7 @@ class NotusStyle {
   }
 
   /// Returns JSON-serializable representation of this style.
-  Map<String, dynamic> toJson() => _data.isEmpty
+  Map<String, dynamic>? toJson() => _data.isEmpty
       ? null
       : _data.map<String, dynamic>((String _, NotusAttribute value) =>
           MapEntry<String, dynamic>(value.key, value.value));
@@ -328,22 +328,22 @@ class NotusStyle {
 }
 
 /// Applies bold style to a text segment.
-class _BoldAttribute extends NotusAttribute<bool> {
+class _BoldAttribute extends NotusAttribute<bool?> {
   const _BoldAttribute() : super._('b', NotusAttributeScope.inline, true);
 }
 
 /// Applies italic style to a text segment.
-class _ItalicAttribute extends NotusAttribute<bool> {
+class _ItalicAttribute extends NotusAttribute<bool?> {
   const _ItalicAttribute() : super._('i', NotusAttributeScope.inline, true);
 }
 
 /// Applies underline style to a text segment.
-class _UnderlineAttribute extends NotusAttribute<bool> {
+class _UnderlineAttribute extends NotusAttribute<bool?> {
   const _UnderlineAttribute() : super._('u', NotusAttributeScope.inline, true);
 }
 
 /// Applies strikethrough style to a text segment.
-class _StrikethroughAttribute extends NotusAttribute<bool> {
+class _StrikethroughAttribute extends NotusAttribute<bool?> {
   const _StrikethroughAttribute() : super._('s', NotusAttributeScope.inline, true);
 }
 
@@ -351,7 +351,7 @@ class _StrikethroughAttribute extends NotusAttribute<bool> {
 ///
 /// There is no need to use this class directly, consider using
 /// [NotusAttribute.link] instead.
-class LinkAttributeBuilder extends NotusAttributeBuilder<String> {
+class LinkAttributeBuilder extends NotusAttributeBuilder<String?> {
   static const _kLink = 'a';
   const LinkAttributeBuilder._() : super._(_kLink, NotusAttributeScope.inline);
 
@@ -364,7 +364,7 @@ class LinkAttributeBuilder extends NotusAttributeBuilder<String> {
 ///
 /// There is no need to use this class directly, consider using
 /// [NotusAttribute.heading] instead.
-class HeadingAttributeBuilder extends NotusAttributeBuilder<int> {
+class HeadingAttributeBuilder extends NotusAttributeBuilder<int?> {
   static const _kHeading = 'heading';
   const HeadingAttributeBuilder._()
       : super._(_kHeading, NotusAttributeScope.line);
@@ -383,7 +383,7 @@ class HeadingAttributeBuilder extends NotusAttributeBuilder<int> {
 ///
 /// There is no need to use this class directly, consider using
 /// [NotusAttribute.block] instead.
-class BlockAttributeBuilder extends NotusAttributeBuilder<String> {
+class BlockAttributeBuilder extends NotusAttributeBuilder<String?> {
   static const _kBlock = 'block';
   const BlockAttributeBuilder._() : super._(_kBlock, NotusAttributeScope.line);
 

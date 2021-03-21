@@ -13,8 +13,8 @@ final italicStyle = NotusStyle().merge(NotusAttribute.italic);
 
 void main() {
   group('TextNode', () {
-    LineNode line;
-    TextNode node;
+    late LineNode line;
+    late TextNode node;
 
     setUp(() {
       line = LineNode();
@@ -102,7 +102,7 @@ void main() {
       expect(line.childCount, 2);
       line.insert(3, 'don', null);
       expect(line.childCount, 4);
-      final b = boldStyle.toJson();
+      final b = boldStyle.toJson()!;
       expect(
         line.children.elementAt(0).toDelta(),
         Delta()..insert('Lon', b),
@@ -148,13 +148,13 @@ void main() {
   });
 
   group('EmbedNode', () {
-    LineNode line;
-    EmbedNode node;
+    late LineNode line;
+    late EmbedNode node;
 
     setUp(() {
       line = LineNode();
       line.insert(0, EmbeddableObject('hr', inline: false), null);
-      node = line.children.first;
+      node = line.children.first as EmbedNode;
     });
 
     test('toPlainText', () {
@@ -178,7 +178,7 @@ void main() {
     test('cutAt', () {
       expect(node.cutAt(0), node);
       line.insert(0, EmbeddableObject('hr', inline: false), null);
-      node = line.children.first;
+      node = line.children.first as EmbedNode;
       expect(node.cutAt(1), isNull);
     });
 

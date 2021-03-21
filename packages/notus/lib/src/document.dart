@@ -201,7 +201,7 @@ class NotusDocument {
   ///   for every character within this range (line-break characters excluded).
   NotusStyle collectStyle(int index, int length) {
     var result = lookupLine(index);
-    LineNode line = result.node;
+    LineNode line = result.node as LineNode;
     return line.collectStyle(result.offset, length);
   }
 
@@ -210,7 +210,7 @@ class NotusDocument {
     // TODO: prevent user from moving caret after last line-break.
     var result = _root.lookup(offset, inclusive: true);
     if (result.node is LineNode) return result;
-    BlockNode block = result.node;
+    BlockNode block = result.node as BlockNode;
     return block.lookup(result.offset, inclusive: true);
   }
 
@@ -238,14 +238,14 @@ class NotusDocument {
       if (op.isInsert) {
         // Must normalize data before inserting into the document, makes sure
         // that any embedded objects are converted into EmbeddableObject type.
-        final data = _normalizeData(op.data);
+        final data = _normalizeData(op.data!);
         _root.insert(offset, data, attributes);
       } else if (op.isDelete) {
-        _root.delete(offset, op.length);
+        _root.delete(offset, op.length!);
       } else if (op.attributes != null) {
-        _root.retain(offset, op.length, attributes);
+        _root.retain(offset, op.length!, attributes!);
       }
-      if (!op.isDelete) offset += op.length;
+      if (!op.isDelete) offset += op.length!;
     }
     _delta = _delta.compose(change);
 
@@ -282,7 +282,7 @@ class NotusDocument {
     for (final op in delta.toList()) {
       if (op.hasAttribute(_kEmbedAttributeKey)) {
         // Convert legacy embed style attribute into the embed insert operation.
-        final attrs = Map<String, dynamic>.from(op.attributes);
+        final attrs = Map<String, dynamic>.from(op.attributes!);
         final data = Map<String, dynamic>.from(attrs[_kEmbedAttributeKey]);
         data[EmbeddableObject.kTypeKey] = data['type'];
         data[EmbeddableObject.kInlineKey] = false;
@@ -300,7 +300,7 @@ class NotusDocument {
   Object _normalizeData(Object data) {
     return data is String
         ? data
-        : data is EmbeddableObject ? data : EmbeddableObject.fromJson(data);
+        : data is EmbeddableObject ? data : EmbeddableObject.fromJson(data as Map<String, dynamic>);
   }
 
   /// Loads [document] delta into this document.
@@ -312,13 +312,13 @@ class NotusDocument {
       final style =
           op.attributes != null ? NotusStyle.fromJson(op.attributes) : null;
       if (op.isInsert) {
-        final data = _normalizeData(op.data);
+        final data = _normalizeData(op.data!);
         _root.insert(offset, data, style);
       } else {
         throw ArgumentError.value(doc,
             'Document Delta can only contain insert operations but ${op.key} found.');
       }
-      offset += op.length;
+      offset += op.length!;
     }
     // Must remove last line if it's empty and with no styles.
     // TODO: find a way for DocumentRoot to not create extra line when composing initial delta.
