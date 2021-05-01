@@ -1,3 +1,4 @@
+
 ## 1.0.0-dev.2.0
 
 * Fixed: Hide selection handle when the current selection is collapsed on Android (#435).
@@ -49,6 +50,11 @@ migration.
 * `ZefyrEditor.scrollable` if set to `false` allows to embed the editor into a custom scrollable
   layout, e.g. a `ListView`.
 * `ZefyrEditr.onLaunchUrl` callback is invoked when the user wants to open a link.
+
+## 0.12.0
+
+* Updated to support Flutter 1.22
+
 
 ## 0.11.0
 
