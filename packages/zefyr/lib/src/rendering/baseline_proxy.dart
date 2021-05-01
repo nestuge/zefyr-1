@@ -3,9 +3,9 @@ import 'package:meta/meta.dart';
 
 class RenderBaselineProxy extends RenderProxyBox {
   RenderBaselineProxy({
-    RenderParagraph child,
-    @required TextStyle textStyle,
-    @required EdgeInsets padding,
+    RenderParagraph? child,
+    required TextStyle textStyle,
+    required EdgeInsets? padding,
   })  : _prototypePainter = TextPainter(
             text: TextSpan(text: ' ', style: textStyle),
             textDirection: TextDirection.ltr,
@@ -17,12 +17,12 @@ class RenderBaselineProxy extends RenderProxyBox {
 
   set textStyle(TextStyle value) {
     assert(value != null);
-    if (_prototypePainter.text.style == value) return;
+    if (_prototypePainter.text!.style == value) return;
     _prototypePainter.text = TextSpan(text: ' ', style: value);
     markNeedsLayout();
   }
 
-  EdgeInsets _padding;
+  EdgeInsets? _padding;
   set padding(EdgeInsets value) {
     assert(value != null);
     if (_padding == value) return;

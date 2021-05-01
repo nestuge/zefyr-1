@@ -103,7 +103,7 @@ int previousCharacter(int index, String string,
   }
 
   int count = 0;
-  int lastNonWhitespace;
+  int? lastNonWhitespace;
   for (final String currentString in string.characters) {
     if (!includeWhitespace &&
         !_isWhitespace(
@@ -135,18 +135,16 @@ mixin RawEditorStateKeyboardMixin on EditorState {
 
   void handleCursorMovement(
     LogicalKeyboardKey key, {
-    @required bool wordModifier,
-    @required bool lineModifier,
-    @required bool shift,
+    required bool wordModifier,
+    required bool lineModifier,
+    required bool shift,
   }) {
     if (wordModifier && lineModifier) {
       // If both modifiers are down, nothing happens on any of the platforms.
       return;
     }
     final selection = widget.controller.selection;
-    assert(selection != null);
-
-    TextSelection /*!*/ newSelection = widget.controller.selection;
+    TextSelection newSelection = widget.controller.selection;
 
     final plainText = textEditingValue.text;
 
@@ -167,7 +165,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
           // including whitespace.
           final int startPoint =
               previousCharacter(newSelection.extentOffset, plainText, false);
-          final TextSelection textSelection = renderEditor
+          final TextSelection textSelection = renderEditor!
               .selectWordAtPosition(TextPosition(offset: startPoint));
           newSelection =
               newSelection.copyWith(extentOffset: textSelection.baseOffset);
@@ -178,7 +176,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
           // boundaries without including whitespace.
           final int startPoint =
               nextCharacter(newSelection.extentOffset, plainText, false);
-          final TextSelection textSelection = renderEditor
+          final TextSelection textSelection = renderEditor!
               .selectWordAtPosition(TextPosition(offset: startPoint));
           newSelection =
               newSelection.copyWith(extentOffset: textSelection.extentOffset);
@@ -191,7 +189,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
           // This is not the optimal approach, see comment below for details.
           final int startPoint =
               previousCharacter(newSelection.extentOffset, plainText, false);
-          final TextSelection textSelection = renderEditor
+          final TextSelection textSelection = renderEditor!
               .selectLineAtPosition(TextPosition(offset: startPoint));
           newSelection =
               newSelection.copyWith(extentOffset: textSelection.baseOffset);
@@ -207,7 +205,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
           // largest right edge of all the remaining boxes.
           final int startPoint = newSelection.extentOffset;
           if (startPoint < plainText.length) {
-            final TextSelection textSelection = renderEditor
+            final TextSelection textSelection = renderEditor!
                 .selectLineAtPosition(TextPosition(offset: startPoint));
             newSelection =
                 newSelection.copyWith(extentOffset: textSelection.extentOffset);
@@ -241,11 +239,11 @@ mixin RawEditorStateKeyboardMixin on EditorState {
       final originPosition = TextPosition(
           offset: upArrow ? selection.baseOffset : selection.extentOffset);
 
-      final child = renderEditor.childAtPosition(originPosition);
+      final child = renderEditor!.childAtPosition(originPosition)!;
       final localPosition = TextPosition(
           offset: originPosition.offset - child.node.documentOffset);
 
-      TextPosition position = upArrow
+      TextPosition? position = upArrow
           ? child.getPositionAbove(localPosition)
           : child.getPositionBelow(localPosition);
 
@@ -253,8 +251,8 @@ mixin RawEditorStateKeyboardMixin on EditorState {
         // There was no text above/below in the current child, check the direct
         // sibling.
         final sibling = upArrow
-            ? renderEditor.childBefore(child)
-            : renderEditor.childAfter(child);
+            ? renderEditor!.childBefore(child)
+            : renderEditor!.childAfter(child);
         if (sibling == null) {
           // reached beginning or end of the document, move to the
           // first/last character
@@ -322,10 +320,9 @@ mixin RawEditorStateKeyboardMixin on EditorState {
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control/command + (X, C, V, A).
   // TODO: Add support for formatting shortcuts: Cmd+B (bold), Cmd+I (italic)
-  Future<void> handleShortcut(InputShortcut shortcut) async {
+  Future<void> handleShortcut(InputShortcut? shortcut) async {
     final selection = widget.controller.selection;
     final plainText = textEditingValue.text;
-    assert(selection != null);
     if (shortcut == InputShortcut.copy) {
       if (!selection.isCollapsed) {
         // ignore: unawaited_futures
@@ -358,7 +355,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final TextEditingValue value = textEditingValue;
-      final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+      final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
         final length = selection.end - selection.start;
         widget.controller.replaceText(
@@ -366,7 +363,7 @@ mixin RawEditorStateKeyboardMixin on EditorState {
           length,
           data.text,
           selection: TextSelection.collapsed(
-              offset: selection.start + data.text.length),
+              offset: selection.start + data.text!.length),
         );
       }
       return;
@@ -385,7 +382,6 @@ mixin RawEditorStateKeyboardMixin on EditorState {
   void handleDelete(bool forward) {
     final selection = widget.controller.selection;
     final plainText = textEditingValue.text;
-    assert(selection != null);
     int cursorPosition = selection.start;
     String textBefore = selection.textBefore(plainText);
     String textAfter = selection.textAfter(plainText);

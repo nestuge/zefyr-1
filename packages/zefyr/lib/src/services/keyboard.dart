@@ -13,11 +13,11 @@ enum CursorMovement { left, right, up, down }
 /// [LogicalKeyboardKey.arrowRight], [LogicalKeyboardKey.arrowUp] or
 /// [LogicalKeyboardKey.arrowDown].
 typedef CursorMovementCallback = void Function(LogicalKeyboardKey key,
-    {bool wordModifier, bool lineModifier, bool shift});
+    {required bool wordModifier, required bool lineModifier, required bool shift});
 
 enum InputShortcut { cut, copy, paste, selectAll }
 
-typedef InputShortcutCallback = void Function(InputShortcut shortcut);
+typedef InputShortcutCallback = void Function(InputShortcut? shortcut);
 typedef OnDeleteCallback = void Function(bool forward);
 
 final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -66,12 +66,10 @@ class KeyboardListener {
   final OnDeleteCallback onDelete;
 
   KeyboardListener({
-    @required this.onCursorMovement,
-    @required this.onShortcut,
-    @required this.onDelete,
-  })  : assert(onCursorMovement != null),
-        assert(onShortcut != null),
-        assert(onDelete != null);
+    required this.onCursorMovement,
+    required this.onShortcut,
+    required this.onDelete,
+  });
 
   bool handleKeyEvent(RawKeyEvent keyEvent) {
     if (kIsWeb) {

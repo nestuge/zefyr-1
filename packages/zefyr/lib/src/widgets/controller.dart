@@ -14,7 +14,7 @@ List<String> _insertionToggleableStyleKeys = [
 ];
 
 class ZefyrController extends ChangeNotifier {
-  ZefyrController([NotusDocument document])
+  ZefyrController([NotusDocument? document])
       : document = document ?? NotusDocument(),
         _selection = TextSelection.collapsed(offset: 0);
 
@@ -55,14 +55,14 @@ class ZefyrController extends ChangeNotifier {
   /// in any cases as we don't want to keep it except on inserts.
   ///
   /// Optionally updates selection if provided.
-  void replaceText(int index, int length, Object data,
-      {TextSelection selection}) {
+  void replaceText(int index, int length, Object? data,
+      {TextSelection? selection}) {
     assert(data is String || data is EmbeddableObject);
-    Delta delta;
+    Delta? delta;
 
     final isDataNotEmpty = data is String ? data.isNotEmpty : true;
     if (length > 0 || isDataNotEmpty) {
-      delta = document.replace(index, length, data);
+      delta = document.replace(index, length, data!);
       // If the delta is an insert operation and we have toggled
       // some styles, then apply those styles to the inserted text.
       if (delta != null &&
@@ -152,7 +152,7 @@ class ZefyrController extends ChangeNotifier {
   ///
   /// If composing this change fails then this method throws [ComposeError].
   void compose(Delta change,
-      {TextSelection selection, ChangeSource source = ChangeSource.remote}) {
+      {TextSelection? selection, ChangeSource source = ChangeSource.remote}) {
     if (change.isNotEmpty) {
       document.compose(change, source);
     }

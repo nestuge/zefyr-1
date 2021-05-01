@@ -49,27 +49,27 @@ abstract class RenderAbstractEditor {
   ///
   /// {@macro flutter.rendering.editable.select}
   void selectWordsInRange({
-    @required Offset from,
-    Offset /*?*/ to,
-    @required SelectionChangedCause cause,
+    required Offset from,
+    Offset? to,
+    required SelectionChangedCause cause,
   });
 
   /// Move the selection to the beginning or end of a word.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWordEdge({@required SelectionChangedCause cause});
+  void selectWordEdge({required SelectionChangedCause cause});
 
   /// Select text between the global positions [from] and [to].
   void selectPositionAt({
-    @required Offset from,
-    Offset /*?*/ to,
-    @required SelectionChangedCause cause,
+    required Offset from,
+    Offset? to,
+    required SelectionChangedCause cause,
   });
 
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWord({@required SelectionChangedCause cause});
+  void selectWord({required SelectionChangedCause cause});
 
   /// Move selection to the location of the last tap down.
   ///
@@ -81,7 +81,7 @@ abstract class RenderAbstractEditor {
   /// If you have a [TextEditingController], it's generally easier to
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
-  void selectPosition({@required SelectionChangedCause cause});
+  void selectPosition({required SelectionChangedCause cause});
 }
 
 /// Displays a Notus document as a vertical list of document segments (lines
@@ -91,15 +91,15 @@ abstract class RenderAbstractEditor {
 class RenderEditor extends RenderEditableContainerBox
     implements RenderAbstractEditor {
   RenderEditor({
-    List<RenderEditableBox> children,
-    @required NotusDocument document,
-    @required TextDirection textDirection,
-    @required bool hasFocus,
-    @required TextSelection selection,
-    @required LayerLink startHandleLayerLink,
-    @required LayerLink endHandleLayerLink,
-    @required EdgeInsetsGeometry padding,
-    TextSelectionChangedHandler onSelectionChanged,
+    List<RenderEditableBox>? children,
+    required NotusDocument document,
+    required TextDirection textDirection,
+    required bool hasFocus,
+    required TextSelection selection,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
+    required EdgeInsetsGeometry padding,
+    TextSelectionChangedHandler? onSelectionChanged,
     EdgeInsets floatingCursorAddedMargin =
         const EdgeInsets.fromLTRB(4, 4, 4, 5),
   })  : assert(document != null),
@@ -220,7 +220,7 @@ class RenderEditor extends RenderEditableContainerBox
   /// this editor from above it.
   ///
   /// Returns `null` if the cursor is currently visible.
-  double /*?*/ getOffsetToRevealCursor(
+  double? getOffsetToRevealCursor(
       double viewportHeight, double scrollOffset, double offsetInViewport) {
     const kMargin = 8.0;
     // Endpoints coordinates represents lower left or lower right corner of
@@ -230,7 +230,7 @@ class RenderEditor extends RenderEditableContainerBox
     final endpoints = getEndpointsForSelection(selection);
     if (endpoints.length == 1) {
       // Collapsed selection => caret
-      final child = childAtPosition(selection.extent);
+      final child = childAtPosition(selection.extent)!;
       final childPosition =
           TextPosition(offset: selection.extentOffset - child.node.offset);
       final caretTop = endpoints.single.point.dy -
@@ -239,7 +239,7 @@ class RenderEditor extends RenderEditableContainerBox
           offsetInViewport;
       final caretBottom =
           endpoints.single.point.dy + kMargin + offsetInViewport;
-      double dy;
+      double? dy;
       if (caretTop < scrollOffset) {
         dy = caretTop;
       } else if (caretBottom > scrollOffset + viewportHeight) {
@@ -259,11 +259,11 @@ class RenderEditor extends RenderEditableContainerBox
     // _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
 
     if (selection.isCollapsed) {
-      final child = childAtPosition(selection.extent);
+      final child = childAtPosition(selection.extent)!;
       final localPosition =
           TextPosition(offset: selection.extentOffset - child.node.offset);
       final localOffset = child.getOffsetForCaret(localPosition);
-      final BoxParentData parentData = child.parentData;
+      final BoxParentData parentData = child.parentData as BoxParentData;
       final start = Offset(0.0, child.preferredLineHeight(localPosition)) +
           localOffset +
           parentData.offset;
@@ -280,7 +280,7 @@ class RenderEditor extends RenderEditableContainerBox
       }
       assert(baseChild != null);
 
-      final BoxParentData baseParentData = baseChild.parentData;
+      final BoxParentData baseParentData = baseChild!.parentData as BoxParentData;
       final baseSelection =
           localSelection(baseChild.node, selection, fromParent: true);
       var basePoint = baseChild.getBaseEndpointForSelection(baseSelection);
@@ -288,7 +288,7 @@ class RenderEditor extends RenderEditableContainerBox
           basePoint.point + baseParentData.offset, basePoint.direction);
 
       final extentNode = node.lookup(selection.end).node;
-      var extentChild = baseChild;
+      RenderEditableBox? extentChild = baseChild;
       while (extentChild != null) {
         if (extentChild.node == extentNode) {
           break;
@@ -297,7 +297,7 @@ class RenderEditor extends RenderEditableContainerBox
       }
       assert(extentChild != null);
 
-      final BoxParentData extentParentData = extentChild.parentData;
+      final BoxParentData extentParentData = extentChild!.parentData as BoxParentData;
       final extentSelection =
           localSelection(extentChild.node, selection, fromParent: true);
       var extentPoint =
@@ -309,7 +309,7 @@ class RenderEditor extends RenderEditableContainerBox
     }
   }
 
-  Offset /*?*/ _lastTapDownPosition;
+  Offset? _lastTapDownPosition;
 
   @override
   void handleTapDown(TapDownDetails details) {
@@ -319,13 +319,13 @@ class RenderEditor extends RenderEditableContainerBox
   /// Called when the selection changes.
   ///
   /// If this is null, then selection changes will be ignored.
-  TextSelectionChangedHandler /*?*/ onSelectionChanged;
+  TextSelectionChangedHandler? onSelectionChanged;
 
   @override
   void selectWordsInRange({
-    @required Offset from,
-    Offset /*?*/ to,
-    @required SelectionChangedCause cause,
+    required Offset from,
+    Offset? to,
+    required SelectionChangedCause cause,
   }) {
     assert(cause != null);
     assert(from != null);
@@ -349,15 +349,15 @@ class RenderEditor extends RenderEditableContainerBox
   }
 
   @override
-  void selectWordEdge({@required SelectionChangedCause cause}) {
+  void selectWordEdge({required SelectionChangedCause cause}) {
     assert(cause != null);
     // _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged == null) {
       return;
     }
-    final position = getPositionForOffset(_lastTapDownPosition);
-    final child = childAtPosition(position);
+    final position = getPositionForOffset(_lastTapDownPosition!);
+    final child = childAtPosition(position)!;
     final nodeOffset = child.node.offset;
     final localPosition = TextPosition(
       offset: position.offset - nodeOffset,
@@ -385,9 +385,9 @@ class RenderEditor extends RenderEditableContainerBox
 
   @override
   void selectPositionAt({
-    @required Offset from,
-    Offset /*?*/ to,
-    @required SelectionChangedCause cause,
+    required Offset from,
+    Offset? to,
+    required SelectionChangedCause cause,
   }) {
     assert(cause != null);
     assert(from != null);
@@ -415,13 +415,13 @@ class RenderEditor extends RenderEditableContainerBox
   }
 
   @override
-  void selectWord({@required SelectionChangedCause cause}) {
-    selectWordsInRange(from: _lastTapDownPosition, cause: cause);
+  void selectWord({required SelectionChangedCause cause}) {
+    selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
   @override
-  void selectPosition({@required SelectionChangedCause cause}) {
-    selectPositionAt(from: _lastTapDownPosition, cause: cause);
+  void selectPosition({required SelectionChangedCause cause}) {
+    selectPositionAt(from: _lastTapDownPosition!, cause: cause);
   }
 
   @override
@@ -430,7 +430,7 @@ class RenderEditor extends RenderEditableContainerBox
 //    _textLayoutLastMaxWidth == constraints.maxWidth &&
 //        _textLayoutLastMinWidth == constraints.minWidth,
 //    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final nodeOffset = child.node.offset;
     final localPosition = TextPosition(
         offset: position.offset - nodeOffset, affinity: position.affinity);
@@ -452,7 +452,7 @@ class RenderEditor extends RenderEditableContainerBox
 //    _textLayoutLastMaxWidth == constraints.maxWidth &&
 //        _textLayoutLastMinWidth == constraints.minWidth,
 //    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final nodeOffset = child.node.offset;
     final localPosition = TextPosition(
         offset: position.offset - nodeOffset, affinity: position.affinity);
@@ -487,7 +487,7 @@ class RenderEditor extends RenderEditableContainerBox
       return;
     }
     if (onSelectionChanged != null) {
-      onSelectionChanged(nextSelection, cause);
+      onSelectionChanged!(nextSelection, cause);
     }
   }
 
@@ -516,7 +516,7 @@ class RenderEditor extends RenderEditableContainerBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -548,7 +548,7 @@ class RenderEditor extends RenderEditableContainerBox
 
   @override
   double preferredLineHeight(TextPosition position) {
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final localPosition =
         TextPosition(offset: position.offset - child.node.offset);
     return child.preferredLineHeight(localPosition);
@@ -558,9 +558,9 @@ class RenderEditor extends RenderEditableContainerBox
   @override
   TextPosition getPositionForOffset(Offset offset) {
     final local = globalToLocal(offset);
-    final child = childAtOffset(local);
+    final child = childAtOffset(local)!;
 
-    final BoxParentData parentData = child.parentData;
+    final BoxParentData parentData = child.parentData as BoxParentData;
     final localOffset = local - parentData.offset;
     final localPosition = child.getPositionForOffset(localOffset);
     return TextPosition(

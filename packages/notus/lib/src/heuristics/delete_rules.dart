@@ -59,8 +59,7 @@ class PreserveLineStyleOnMergeRule extends DeleteRule {
       }
       var attributes = _unsetAttributes(op.attributes);
       if (target.isNotPlain) {
-        attributes ??= <String, dynamic>{};
-        attributes.addAll(target.attributes);
+        attributes.addAll(target.attributes!);
       }
       result..retain(lf)..retain(1, attributes);
       break;
@@ -68,8 +67,8 @@ class PreserveLineStyleOnMergeRule extends DeleteRule {
     return result;
   }
 
-  Map<String, dynamic>? _unsetAttributes(Map<String, dynamic>? attributes) {
-    if (attributes == null) return null;
+  Map<String, dynamic> _unsetAttributes(Map<String, dynamic>? attributes) {
+    if (attributes == null) return <String, dynamic>{};
     return attributes.map<String, dynamic>(
         (String key, dynamic value) => MapEntry<String, dynamic>(key, null));
   }

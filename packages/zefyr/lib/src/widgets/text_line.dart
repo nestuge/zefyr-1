@@ -14,14 +14,14 @@ import 'theme.dart';
 class TextLine extends StatelessWidget {
   /// Line of text represented by this widget.
   final LineNode node;
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
   final ZefyrEmbedBuilder embedBuilder;
 
   const TextLine({
-    Key key,
-    @required this.node,
+    Key? key,
+    required this.node,
     this.textDirection,
-    @required this.embedBuilder,
+    required this.embedBuilder,
   })  : assert(node != null),
         assert(embedBuilder != null),
         super(key: key);
@@ -36,7 +36,7 @@ class TextLine extends StatelessWidget {
     }
     final text = buildText(context, node);
     final strutStyle =
-        StrutStyle.fromTextStyle(text.style, forceStrutHeight: true);
+        StrutStyle.fromTextStyle(text.style!, forceStrutHeight: true);
     return RichTextProxy(
       textStyle: text.style,
       textDirection: textDirection,
@@ -62,8 +62,8 @@ class TextLine extends StatelessWidget {
     );
   }
 
-  TextSpan _segmentToTextSpan(Node node, ZefyrThemeData theme) {
-    final TextNode segment = node;
+  TextSpan _segmentToTextSpan(Node node, ZefyrThemeData? theme) {
+    final TextNode segment = node as TextNode;
     final attrs = segment.style;
 
     return TextSpan(
@@ -72,60 +72,60 @@ class TextLine extends StatelessWidget {
     );
   }
 
-  TextStyle _getParagraphTextStyle(NotusStyle style, ZefyrThemeData theme) {
+  TextStyle _getParagraphTextStyle(NotusStyle style, ZefyrThemeData? theme) {
     var textStyle = TextStyle();
-    final heading = node.style.get(NotusAttribute.heading);
+    final heading = node.style.get(NotusAttribute.heading as NotusAttributeKey<int>);
     if (heading == NotusAttribute.heading.level1) {
-      textStyle = textStyle.merge(theme.heading1.style);
+      textStyle = textStyle.merge(theme!.heading1!.style);
     } else if (heading == NotusAttribute.heading.level2) {
-      textStyle = textStyle.merge(theme.heading2.style);
+      textStyle = textStyle.merge(theme!.heading2!.style);
     } else if (heading == NotusAttribute.heading.level3) {
-      textStyle = textStyle.merge(theme.heading3.style);
+      textStyle = textStyle.merge(theme!.heading3!.style);
     } else {
-      textStyle = textStyle.merge(theme.paragraph.style);
+      textStyle = textStyle.merge(theme!.paragraph!.style);
     }
 
-    final block = style.get(NotusAttribute.block);
+    final block = style.get(NotusAttribute.block as NotusAttributeKey<String>);
     if (block == NotusAttribute.block.quote) {
-      textStyle = textStyle.merge(theme.quote.style);
+      textStyle = textStyle.merge(theme.quote!.style);
     } else if (block == NotusAttribute.block.code) {
-      textStyle = textStyle.merge(theme.code.style);
+      textStyle = textStyle.merge(theme.code!.style);
     } else if (block != null) {
       // lists
-      textStyle = textStyle.merge(theme.lists.style);
+      textStyle = textStyle.merge(theme.lists!.style);
     }
 
     return textStyle;
   }
 
-  TextStyle _getInlineTextStyle(NotusStyle style, ZefyrThemeData theme) {
+  TextStyle _getInlineTextStyle(NotusStyle style, ZefyrThemeData? theme) {
     var result = TextStyle();
     if (style.containsSame(NotusAttribute.bold)) {
-      result = _mergeTextStyleWithDecoration(result, theme.bold);
+      result = _mergeTextStyleWithDecoration(result, theme!.bold!);
     }
     if (style.containsSame(NotusAttribute.italic)) {
-      result = _mergeTextStyleWithDecoration(result, theme.italic);
+      result = _mergeTextStyleWithDecoration(result, theme!.italic!);
     }
     if (style.contains(NotusAttribute.link)) {
-      result = _mergeTextStyleWithDecoration(result, theme.link);
+      result = _mergeTextStyleWithDecoration(result, theme!.link!);
     }
     if (style.contains(NotusAttribute.underline)) {
-      result = _mergeTextStyleWithDecoration(result, theme.underline);
+      result = _mergeTextStyleWithDecoration(result, theme!.underline!);
     }
     if (style.contains(NotusAttribute.strikethrough)) {
-      result = _mergeTextStyleWithDecoration(result, theme.strikethrough);
+      result = _mergeTextStyleWithDecoration(result, theme!.strikethrough!);
     }
     return result;
   }
 
   TextStyle _mergeTextStyleWithDecoration(TextStyle a, TextStyle b) {
-    var decorations = <TextDecoration>[];
+    var decorations = <TextDecoration?>[];
     if (a.decoration != null) {
       decorations.add(a.decoration);
     }
     if (b.decoration != null) {
       decorations.add(b.decoration);
     }
-    return a.merge(b).apply(decoration: TextDecoration.combine(decorations));
+    return a.merge(b).apply(decoration: TextDecoration.combine(decorations as List<TextDecoration>));
   }
 }

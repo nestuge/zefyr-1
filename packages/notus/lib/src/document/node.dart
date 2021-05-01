@@ -25,10 +25,10 @@ abstract class Node extends LinkedListEntry<Node> {
   ContainerNode? _parent;
 
   /// Returns `true` if this node is the first node in the [parent] list.
-  bool get isFirst => list!.first == this;
+  bool get isFirst => list?.first == this;
 
   /// Returns `true` if this node is the last node in the [parent] list.
-  bool get isLast => list!.last == this;
+  bool get isLast => list?.last == this;
 
   /// Length of this node in characters.
   int get length;
@@ -167,21 +167,21 @@ abstract class ContainerNode<T extends Node?> extends Node {
   void add(T node) {
     assert(node?._parent == null);
     node?._parent = this;
-    _children.add(node!);
+    _children.add(node as Node);
   }
 
   /// Adds [node] to the beginning of this container children list.
   void addFirst(T node) {
     assert(node?._parent == null);
     node?._parent = this;
-    _children.addFirst(node!);
+    _children.addFirst(node as Node);
   }
 
   /// Removes [node] from this container.
   void remove(T node) {
     assert(node?._parent == this);
     node?._parent = null;
-    _children.remove(node!);
+    _children.remove(node as Node);
   }
 
   /// Moves children of this node to [newParent].

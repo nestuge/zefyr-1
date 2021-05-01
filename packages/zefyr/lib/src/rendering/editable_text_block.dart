@@ -13,11 +13,11 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     implements RenderEditableBox {
   ///
   RenderEditableTextBlock({
-    List<RenderEditableBox> children,
-    @required BlockNode node,
-    @required TextDirection textDirection,
-    @required EdgeInsetsGeometry padding,
-    @required Decoration decoration,
+    List<RenderEditableBox>? children,
+    required BlockNode node,
+    required TextDirection textDirection,
+    required EdgeInsetsGeometry padding,
+    required Decoration decoration,
     ImageConfiguration configuration = ImageConfiguration.empty,
     EdgeInsets contentPadding = EdgeInsets.zero,
   })  : assert(node != null),
@@ -51,7 +51,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     _savedPadding = value;
   }
 
-  BoxPainter /*?*/ _painter;
+  BoxPainter? _painter;
 
   /// What decoration to paint.
   ///
@@ -84,7 +84,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
 
   @override
   TextRange getLineBoundary(TextPosition position) {
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final positionInChild = TextPosition(
       offset: position.offset - child.node.offset,
       affinity: position.affinity,
@@ -98,12 +98,12 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
 
   @override
   Offset getOffsetForCaret(TextPosition position) {
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final localPosition = TextPosition(
       offset: position.offset - child.node.offset,
       affinity: position.affinity,
     );
-    final BoxParentData parentData = child.parentData;
+    final BoxParentData parentData = child.parentData as BoxParentData;
     return child.getOffsetForCaret(localPosition) + parentData.offset;
   }
 
@@ -112,8 +112,8 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
   /// object.
   @override
   TextPosition getPositionForOffset(Offset offset) {
-    final child = childAtOffset(offset);
-    final BoxParentData parentData = child.parentData;
+    final child = childAtOffset(offset)!;
+    final BoxParentData parentData = child.parentData as BoxParentData;
     final localOffset = offset - parentData.offset;
     final localPosition = child.getPositionForOffset(localOffset);
     return TextPosition(
@@ -124,7 +124,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
 
   @override
   TextRange getWordBoundary(TextPosition position) {
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     // memoize node's offset since it's not cached by the document.
     final nodeOffset = child.node.offset;
     final childPosition = TextPosition(offset: position.offset - nodeOffset);
@@ -136,14 +136,14 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
   }
 
   @override
-  TextPosition getPositionAbove(TextPosition position) {
+  TextPosition? getPositionAbove(TextPosition position) {
     assert(position.offset < node.length);
 
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final childLocalPosition =
         TextPosition(offset: position.offset - child.node.offset);
     // ignore: omit_local_variable_types
-    TextPosition result = child.getPositionAbove(childLocalPosition);
+    TextPosition? result = child.getPositionAbove(childLocalPosition);
     if (result != null) {
       return TextPosition(offset: result.offset + child.node.offset);
     }
@@ -163,14 +163,14 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
   }
 
   @override
-  TextPosition /*?*/ getPositionBelow(TextPosition position) {
+  TextPosition? getPositionBelow(TextPosition position) {
     assert(position.offset < node.length);
 
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final childLocalPosition =
         TextPosition(offset: position.offset - child.node.offset);
     // ignore: omit_local_variable_types
-    TextPosition result = child.getPositionBelow(childLocalPosition);
+    TextPosition? result = child.getPositionBelow(childLocalPosition);
     if (result != null) {
       return TextPosition(offset: result.offset + child.node.offset);
     }
@@ -191,7 +191,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
 
   @override
   double preferredLineHeight(TextPosition position) {
-    final child = childAtPosition(position);
+    final child = childAtPosition(position)!;
     final localPosition =
         TextPosition(offset: position.offset - child.node.offset);
     return child.preferredLineHeight(localPosition);
@@ -216,7 +216,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     }
     assert(baseChild != null);
 
-    final BoxParentData baseParentData = baseChild.parentData;
+    final BoxParentData baseParentData = baseChild!.parentData as BoxParentData;
     final baseSelection =
         localSelection(baseChild.node, selection, fromParent: true);
     var basePoint = baseChild.getBaseEndpointForSelection(baseSelection);
@@ -244,7 +244,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     }
     assert(extentChild != null);
 
-    final BoxParentData extentParentData = extentChild.parentData;
+    final BoxParentData extentParentData = extentChild!.parentData as BoxParentData;
     final extentSelection =
         localSelection(extentChild.node, selection, fromParent: true);
     var extentPoint =
@@ -279,11 +279,11 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     assert(size.height != null);
     _painter ??= _decoration.createBoxPainter(markNeedsPaint);
 
-    final decorationPadding = resolvedPadding - _contentPadding;
+    final decorationPadding = resolvedPadding! - _contentPadding;
 
     final decorationSize = decorationPadding.deflateSize(size);
     final filledConfiguration = configuration.copyWith(size: decorationSize);
-    int /*?*/ debugSaveCount;
+    int? debugSaveCount;
     assert(() {
       debugSaveCount = context.canvas.getSaveCount();
       return true;
@@ -293,7 +293,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
     // by cursorMargin.
     final decorationOffset =
         offset.translate(decorationPadding.left, decorationPadding.top);
-    _painter.paint(context.canvas, decorationOffset, filledConfiguration);
+    _painter!.paint(context.canvas, decorationOffset, filledConfiguration);
     assert(() {
       if (debugSaveCount != context.canvas.getSaveCount()) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -315,7 +315,7 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 }

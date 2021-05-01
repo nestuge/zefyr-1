@@ -8,14 +8,14 @@ import 'editable_box.dart';
 class RenderParagraphProxy extends RenderProxyBox
     implements RenderContentProxyBox {
   RenderParagraphProxy({
-    RenderParagraph child,
-    @required TextStyle textStyle,
-    @required TextDirection textDirection,
-    @required double textScaleFactor,
-    @required StrutStyle strutStyle,
-    @required Locale locale,
-    @required TextWidthBasis textWidthBasis,
-    @required TextHeightBehavior textHeightBehavior,
+    RenderParagraph? child,
+    required TextStyle? textStyle,
+    required TextDirection? textDirection,
+    required double textScaleFactor,
+    required StrutStyle strutStyle,
+    required Locale locale,
+    required TextWidthBasis textWidthBasis,
+    required TextHeightBehavior? textHeightBehavior,
   })  : _prototypePainter = TextPainter(
             text: TextSpan(text: ' ', style: textStyle),
             textAlign: TextAlign.left,
@@ -31,7 +31,7 @@ class RenderParagraphProxy extends RenderProxyBox
 
   set textStyle(TextStyle value) {
     assert(value != null);
-    if (_prototypePainter.text.style == value) return;
+    if (_prototypePainter.text!.style == value) return;
     _prototypePainter.text = TextSpan(text: ' ', style: value);
     markNeedsLayout();
   }
@@ -70,41 +70,41 @@ class RenderParagraphProxy extends RenderProxyBox
     markNeedsLayout();
   }
 
-  set textHeightBehavior(TextHeightBehavior value) {
+  set textHeightBehavior(TextHeightBehavior? value) {
     if (_prototypePainter.textHeightBehavior == value) return;
     _prototypePainter.textHeightBehavior = value;
     markNeedsLayout();
   }
 
   @override
-  RenderParagraph get child => super.child;
+  RenderParagraph? get child => super.child as RenderParagraph?;
 
   @override
   double get preferredLineHeight => _prototypePainter.preferredLineHeight;
 
   @override
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    return child.getOffsetForCaret(position, caretPrototype);
+    return child!.getOffsetForCaret(position, caretPrototype);
   }
 
   @override
   TextPosition getPositionForOffset(Offset offset) {
-    return child.getPositionForOffset(offset);
+    return child!.getPositionForOffset(offset);
   }
 
   @override
-  double getFullHeightForCaret(TextPosition position) {
-    return child.getFullHeightForCaret(position);
+  double? getFullHeightForCaret(TextPosition position) {
+    return child!.getFullHeightForCaret(position);
   }
 
   @override
   TextRange getWordBoundary(TextPosition position) {
-    return child.getWordBoundary(position);
+    return child!.getWordBoundary(position);
   }
 
   @override
   List<TextBox> getBoxesForSelection(TextSelection selection) {
-    return child.getBoxesForSelection(selection);
+    return child!.getBoxesForSelection(selection);
   }
 
   @override

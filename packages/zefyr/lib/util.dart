@@ -22,17 +22,17 @@ int getPositionDelta(Delta user, Delta actual) {
     assert(userOp.length == actualOp.length);
     if (userOp.key == actualOp.key) continue;
     if (userOp.isInsert && actualOp.isRetain) {
-      diff -= userOp.length;
+      diff -= userOp.length!;
     } else if (userOp.isDelete && actualOp.isRetain) {
-      diff += userOp.length;
+      diff += userOp.length!;
     } else if (userOp.isRetain && actualOp.isInsert) {
-      final opText = actualOp.data is String ? actualOp.data as String : '';
+      final opText = actualOp.data is String ? (actualOp.data as String?)! : '';
       if (opText.startsWith('\n')) {
         // At this point user input reached its end (retain). If a heuristic
         // rule inserts a new line we should keep cursor on it's original position.
         continue;
       }
-      diff += actualOp.length;
+      diff += actualOp.length!;
     } else {
       // TODO: this likely needs to cover more edge cases.
     }
