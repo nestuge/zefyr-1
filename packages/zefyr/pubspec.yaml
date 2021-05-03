@@ -17,9 +17,13 @@ dependencies:
   collection: ^1.14.6
   url_launcher: ^5.0.0
   quill_delta: 
-    path: ../quill-delta-dart
-  notus:
-    path: ../notus
+    git:
+      url: https://github.com/nestuge/zefyr-1.git
+      path: packages/quill-delta-dart
+  notus: 
+    git:
+      url: https://github.com/nestuge/zefyr-1.git
+      path: packages/notus
   meta: ^1.1.0
   quiver: ^3.0.0
   characters: ^1.0.0
