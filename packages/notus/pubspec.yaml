@@ -13,7 +13,9 @@ dependencies:
   collection: ^1.14.6
   meta: ^1.1.0
   quill_delta: 
-    path: ../quill-delta-dart
+    git:
+      url: https://github.com/nestuge/zefyr-1.git
+      path: packages/quill-delta-dart
   quiver: ^3.0.0
 
 dev_dependencies:
